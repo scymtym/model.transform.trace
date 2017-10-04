@@ -24,3 +24,15 @@
 
 (defmacro ensured-transform* ((transform &rest sources) &body body)
   `(ensure-transformed (lambda () ,@body) *tracer* ,transform ,@sources))
+
+(defmacro recording-transform/list ((tracer transform sources) &body body)
+  `(apply #'call-recording-transform (lambda () ,@body) ,tracer ,transform ,sources))
+
+(defmacro recording-transform/list* ((transform sources) &body body)
+  `(apply #'call-recording-transform (lambda () ,@body) *tracer* ,transform ,sources))
+
+(defmacro ensured-transform/list ((tracer transform sources) &body body)
+  `(apply #'ensure-transformed (lambda () ,@body) ,tracer ,transform ,sources))
+
+(defmacro ensured-transform/list* ((transform sources) &body body)
+  `(apply #'ensure-transformed (lambda () ,@body) *tracer* ,transform ,sources))
