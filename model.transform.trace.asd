@@ -6,8 +6,9 @@
                 :pathname   "src"
                 :serial     t
                 :components ((:file       "package")
-                             (:file       "protocol")
                              (:file       "variables")
+                             (:file       "protocol")
+                             (:file       "conditions")
 
                              (:file       "trace")
                              (:file       "tracer")

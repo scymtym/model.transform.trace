@@ -43,6 +43,16 @@
     (assert (length= 1 sources))
     (first sources)))
 
+(defmethod add-trace :before ((tracer tracer) (trace t))
+  (let ((by-target (%traces-by-target tracer)))
+    (map nil (lambda (target)
+               (when-let ((existing-trace (gethash target by-target '())))
+                 (error 'duplicate-trace-error
+                        :tracer         tracer
+                        :target         target
+                        :existing-trace existing-trace)))
+         (targets trace))))
+
 (defmethod add-trace ((tracer tracer) (trace t))
   (let ((by-source (%traces-by-source tracer))
         (by-target (%traces-by-target tracer)))
@@ -51,8 +61,5 @@
                (push trace (gethash source by-source '())))
          (sources trace))
     (map nil (lambda (target)
-               (when (gethash target by-target '())
-                 (error "~@<There already is a trace for target ~A.~@:>"
-                        target))
                (setf (gethash target by-target) trace))
          (targets trace))))
