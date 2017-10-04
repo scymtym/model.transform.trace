@@ -22,6 +22,10 @@
 
 ;;; Tracer protocol
 
+(defun make-tracer ()
+  "Return an object suitable for use with the tracer protocol."
+  (make-instance 'tracer))
+
 (defgeneric traces (tracer)
   (:documentation
    "Return sequence of traces stored in TRACER."))

@@ -26,6 +26,8 @@
 
   ;; Tracer protocol
   (:export
+   #:make-tracer
+
    #:traces                    #:traces*
 
    #:traces-for-source         #:traces-for-source*
