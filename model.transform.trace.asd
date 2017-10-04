@@ -7,6 +7,7 @@
                 :serial     t
                 :components ((:file       "package")
                              (:file       "protocol")
+                             (:file       "variables")
 
                              (:file       "trace")
                              (:file       "tracer")

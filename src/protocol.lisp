@@ -148,3 +148,36 @@
                             (push root result))
                           target)
     result))
+
+;;; Abbreviated versions
+
+(macrolet ((define-abbreviation (name (&rest args))
+             (let* ((name* (symbolicate name '#:*))
+                    (&rest (position '&rest args))
+                    (args1 (subseq args 0 &rest))
+                    (rest  (when &rest (nth (1+ &rest) args))))
+               `(defun ,name* ,args
+                  ,(format nil "Like `~(~A~)' but uses `*tracer*' ~
+                                instead of accepting a tracer ~
+                                parameter."
+                           name)
+                  ,(if rest
+                       `(apply #',name *tracer* ,@args1 ,rest)
+                       `(,name *tracer* ,@args1))))))
+  (define-abbreviation traces ())
+
+  (define-abbreviation traces-for-source (source))
+  (define-abbreviation direct-targets-for-source (source))
+  (define-abbreviation direct-target-for-source (source))
+
+  (define-abbreviation trace-for-target (target))
+  (define-abbreviation direct-sources-for-target (target))
+  (define-abbreviation direct-source-for-target (target))
+
+  (define-abbreviation add-trace (trace))
+
+  (define-abbreviation walk-sources-for-target (function target))
+  (define-abbreviation walk-unique-sources-for-target (function target))
+  (define-abbreviation sources-for-target (target))
+  (define-abbreviation map-roots-for-target (function target))
+  (define-abbreviation roots-for-target (target)))

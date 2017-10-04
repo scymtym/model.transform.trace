@@ -6,8 +6,21 @@
 
 (cl:in-package #:model.transform.trace)
 
+;;;
+
+(defmacro with-tracer ((tracer) &body body)
+  `(let ((*tracer* ,tracer)) ,@body))
+
+;;;
+
 (defmacro recording-transform ((tracer transform &rest sources) &body body)
   `(call-recording-transform (lambda () ,@body) ,tracer ,transform ,@sources))
 
+(defmacro recording-transform* ((transform &rest sources) &body body)
+  `(call-recording-transform (lambda () ,@body) *tracer* ,transform ,@sources))
+
 (defmacro ensured-transform ((tracer transform &rest sources) &body body)
   `(ensure-transformed (lambda () ,@body) ,tracer ,transform ,@sources))
+
+(defmacro ensured-transform* ((transform &rest sources) &body body)
+  `(ensure-transformed (lambda () ,@body) *tracer* ,transform ,@sources))
