@@ -39,7 +39,7 @@
     (sources trace)))
 
 (defmethod direct-source-for-target ((tracer tracer) (target t))
-  (when-let ((sources (sources-for-target tracer target)))
+  (when-let ((sources (direct-sources-for-target tracer target)))
     (assert (length= 1 sources))
     (first sources)))
 
