@@ -7,21 +7,21 @@
 (cl:in-package #:model.transform.trace)
 
 (defun call-recording-transform (thunk tracer transform &rest sources)
-  (let ((target (funcall thunk)))
-    (add-trace tracer (make-trace sources target transform))
-    target))
+  (let ((targets (multiple-value-list (funcall thunk))))
+    (add-trace tracer (make-trace sources targets transform))
+    (values-list targets)))
 
 (defun ensure-transformed (thunk tracer transform &rest sources)
-  (labels ((trace (source)
-             (or (find transform (traces-for-source tracer source)
-                       :test #'eq :key #'transform)
-                 (throw 'no-trace nil)))
-           (cached-target ()
-             (catch 'no-trace
-               (let ((traces (map 'list #'trace sources)))
-                 (when (every #'eq traces (rest traces))
-                   (target (first traces)))))))
-    (or (if (length= 1 sources)
-            (direct-target-for-source tracer (first sources)) ; TODO support (eq target nil) ?
-            (cached-target))
-        (apply #'call-recording-transform thunk tracer transform sources))))
+  (assert (not (null sources)))
+  (if-let ((cached-targets
+            (if (length= 1 sources)
+                (direct-targets-for-source
+                 tracer (first sources)) ; TODO support (eq target nil) ?
+                (block nil
+                  (map nil (lambda (trace)
+                             (when (set-equal (sources trace) sources
+                                              :test #'eq)
+                               (return (targets trace))))
+                       (traces-for-source tracer (first sources)))))))
+    (values-list cached-targets)
+    (apply #'call-recording-transform thunk tracer transform sources)))
