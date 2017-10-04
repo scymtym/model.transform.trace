@@ -7,22 +7,22 @@
 (cl:in-package #:model.transform.trace)
 
 (defclass trace (print-items:print-items-mixin)
-  ((sources   :initarg  :sources
+  ((transform :initarg  :transform
+              :reader   transform
+              :initform nil)
+   (sources   :initarg  :sources
               :type     list
               :reader   sources
               :initform '())
    (targets   :initarg  :targets
               :type     list
               :reader   targets
-              :initform '())
-   (transform :initarg  :transform
-              :reader   transform
-              :initform nil)))
+              :initform '())))
 
 (defmethod print-items:print-items append ((object trace))
-  `((:sources   ,(sources object)   "~{~A~^ ~} -")
-    (:transform ,(transform object) "~@[~A~]"      ((:after :sources)))
-    (:targets   ,(targets object)   "-> ~{~A~^ ~}" ((:after :transform)))))
+  `((:sources   ,(sources object)   "~:[∅~;~:*~{~A~^ ~}~] -")
+    (:transform ,(transform object) "~@[~A~]"                 ((:after :sources)))
+    (:targets   ,(targets object)   "-> ~:[∅~;~:*~{~A~^ ~}~]" ((:after :transform)))))
 
 (defun make-trace (source-or-sources target-or-targets &optional transform)
   (make-instance 'trace
