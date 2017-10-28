@@ -7,15 +7,20 @@
 (cl:in-package #:model.transform.trace)
 
 (defclass tracer (print-items:print-items-mixin)
-  ((traces           :reader   traces
-                     :initform (make-array 0 :adjustable t :fill-pointer 0))
-   (traces-by-source :reader   %traces-by-source
-                     :initform (make-hash-table :test #'eq))
-   (traces-by-target :reader   %traces-by-target
-                     :initform (make-hash-table :test #'eq))))
+  ((traces              :reader   traces
+                        :initform (make-array 0 :adjustable t :fill-pointer 0))
+   (traces-by-transform :reader   %traces-by-transform
+                        :initform (make-hash-table :test #'eq))
+   (traces-by-source    :reader   %traces-by-source
+                        :initform (make-hash-table :test #'eq))
+   (traces-by-target    :reader   %traces-by-target
+                        :initform (make-hash-table :test #'eq))))
 
 (defmethod print-items:print-items append ((object tracer))
   `((:trace-count ,(length (traces object)) "(~:D)")))
+
+(defmethod traces-for-transform ((tracer tracer) (transform t))
+  (gethash transform (%traces-by-transform tracer)))
 
 (defmethod traces-for-source ((tracer tracer) (source t))
   (gethash source (%traces-by-source tracer)))
@@ -44,19 +49,34 @@
     (first sources)))
 
 (defmethod add-trace :before ((tracer tracer) (trace t))
+  ;; This can legitimately happen if e.g. transform T1 produces an
+  ;; object O as its output and a second transform T2 is the identity
+  ;; on O.
+  #+no (let ((by-target (%traces-by-target tracer)))
+         (map nil (lambda (target)
+                    (when-let ((existing-trace (gethash target by-target '())))
+                      (error 'duplicate-trace-error
+                             :tracer         tracer
+                             :target         target
+                             :existing-trace existing-trace)))
+              (targets trace)))
+
   (let ((by-target (%traces-by-target tracer)))
     (map nil (lambda (target)
-               (when-let ((existing-trace (gethash target by-target '())))
-                 (error 'duplicate-trace-error
-                        :tracer         tracer
-                        :target         target
-                        :existing-trace existing-trace)))
+               (unless (find target (sources trace) :test #'eq)
+                 (when-let ((existing-trace (gethash target by-target '())))
+                   (error 'duplicate-trace-error
+                          :tracer         tracer
+                          :target         target
+                          :existing-trace existing-trace))))
          (targets trace))))
 
 (defmethod add-trace ((tracer tracer) (trace t))
-  (let ((by-source (%traces-by-source tracer))
-        (by-target (%traces-by-target tracer)))
+  (let ((by-transform (%traces-by-transform tracer))
+        (by-source    (%traces-by-source tracer))
+        (by-target    (%traces-by-target tracer)))
     (vector-push-extend trace (traces tracer))
+    (push trace (gethash (transform trace) by-transform '()))
     (map nil (lambda (source)
                (push trace (gethash source by-source '())))
          (sources trace))

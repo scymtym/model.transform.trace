@@ -71,7 +71,7 @@
 
     The lambda list of FUNCTION has to be compatible with
 
-      (recurse source target)
+      (recurse source target) ; TODO transform?
 
     where
 
@@ -95,11 +95,13 @@
 
 (defmethod walk-sources-for-target ((tracer t) (function function) (target t))
   (labels ((rec (function target)
-             (map 'list (lambda (source)
-                          (labels ((recurse (&key (function function))
-                                     (rec function source)))
-                            (funcall function #'recurse source target)))
-                  (direct-sources-for-target tracer target))))
+             (when-let ((trace (trace-for-target tracer target)))
+               (let ((transform (transform trace)))
+                 (map 'list (lambda (source)
+                              (labels ((recurse (&key (function function))
+                                         (rec function source)))
+                                (funcall function #'recurse transform source target)))
+                      (sources trace))))))
     (rec function target)))
 
 (defmethod walk-unique-sources-for-target ((tracer t) (function t) (target t))
@@ -109,7 +111,7 @@
     ((tracer t) (function function) (target t))
   (let ((seen (make-hash-table :test #'equal)))
     (labels
-        ((visit (function recurse source target)
+        ((visit (function recurse transform source target)
            (let ((key (cons source target)))
              (multiple-value-bind (result seen?) (gethash key seen)
                (when seen?
@@ -120,7 +122,7 @@
                      (labels ((recurse (&key (function function))
                                 (funcall recurse
                                          :function (curry #'visit function))))
-                       (funcall function #'recurse source target)))))))
+                       (funcall function #'recurse transform source target)))))))
       (walk-sources-for-target tracer (curry #'visit function) target))))
 
 (defmethod sources-for-target ((tracer t) (target t))
@@ -138,8 +140,8 @@
   (map-roots-for-target (ensure-function function) tracer target))
 
 (defmethod map-roots-for-target ((tracer t) (function function) (target t))
-  (flet ((visit (recurse source target)
-           (declare (ignore target))
+  (flet ((visit (recurse transform source target)
+           (declare (ignore transform target))
            (unless (funcall recurse)
              (funcall function source))
            t))

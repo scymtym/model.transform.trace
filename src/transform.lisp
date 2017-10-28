@@ -15,12 +15,14 @@
   (assert (not (null sources)))
   (if-let ((cached-targets
             (if (length= 1 sources)
-                (direct-targets-for-source
-                 tracer (first sources)) ; TODO support (eq target nil) ?
+                (when-let* ((traces (traces-for-source tracer (first sources)))
+                            (trace  (find transform traces :key #'transform)))
+                  (targets trace))
                 (block nil
                   (map nil (lambda (trace)
-                             (when (set-equal (sources trace) sources
-                                              :test #'eq)
+                             (when (and (eq (transform trace) transform)
+                                        (set-equal (sources trace) sources
+                                                   :test #'eq))
                                (return (targets trace))))
                        (traces-for-source tracer (first sources)))))))
     (values-list cached-targets)
