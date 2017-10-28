@@ -8,4 +8,6 @@
 
 ;;; Dynamic scope tracing context
 
-(defvar *tracer* nil)
+(defvar *tracer*)
+
+(defvar *transform*)
