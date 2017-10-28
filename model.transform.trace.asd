@@ -1,6 +1,7 @@
-(defsystem :model.transform.trace
+(defsystem "model.transform.trace"
 
-  :depends-on (:utilities.print-items)
+  :depends-on ("alexandria"
+               "utilities.print-items")
 
   :components ((:module     "trace"
                 :pathname   "src"
