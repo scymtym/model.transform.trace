@@ -11,28 +11,36 @@
 (defmacro with-tracer ((tracer) &body body)
   `(let ((*tracer* ,tracer)) ,@body))
 
-;;;
+(defmacro with-transform ((transform) &body body)
+  `(let ((*transform* ,transform)) ,@body))
 
-(defmacro recording-transform ((tracer transform &rest sources) &body body)
-  `(call-recording-transform (lambda () ,@body) ,tracer ,transform ,@sources))
+;;; {recording,ensured}-transform[*]
 
-(defmacro recording-transform* ((transform &rest sources) &body body)
-  `(call-recording-transform (lambda () ,@body) *tracer* ,transform ,@sources))
+(defun make-call (function
+                  tracer-form transform-form sources-forms body
+                  last-source-is-list?)
+  (when (and last-source-is-list? (null sources-forms))
+    (error "~@<At least one source form is required.~@:>"))
+  `(,function (lambda () ,@body) ,tracer-form ,transform-form
+              ,@(if last-source-is-list?
+                    sources-forms
+                    `(,@(butlast sources-forms)
+                        ,(lastcar sources-forms)))))
 
-(defmacro ensured-transform ((tracer transform &rest sources) &body body)
-  `(ensure-transformed (lambda () ,@body) ,tracer ,transform ,@sources))
+(macrolet
+    ((define-macros (name function)
+       (flet ((one-macro (name last-source-is-list?)
+                `(defmacro ,name (((&optional (transform '*transform*)
+                                              (tracer    '*tracer*))
+                                   &rest sources)
+                                  &body body)
+                   (make-call ',function tracer transform sources body
+                              ,last-source-is-list?))))
+         (let ((name* (symbolicate name '*)))
+           `(progn
+              ,(one-macro name  nil)
+              ,(one-macro name* t))))))
 
-(defmacro ensured-transform* ((transform &rest sources) &body body)
-  `(ensure-transformed (lambda () ,@body) *tracer* ,transform ,@sources))
+  (define-macros recording-transform call-recording-transform)
 
-(defmacro recording-transform/list ((tracer transform sources) &body body)
-  `(apply #'call-recording-transform (lambda () ,@body) ,tracer ,transform ,sources))
-
-(defmacro recording-transform/list* ((transform sources) &body body)
-  `(apply #'call-recording-transform (lambda () ,@body) *tracer* ,transform ,sources))
-
-(defmacro ensured-transform/list ((tracer transform sources) &body body)
-  `(apply #'ensure-transformed (lambda () ,@body) ,tracer ,transform ,sources))
-
-(defmacro ensured-transform/list* ((transform sources) &body body)
-  `(apply #'ensure-transformed (lambda () ,@body) *tracer* ,transform ,sources))
+  (define-macros ensured-transform   ensure-transformed))

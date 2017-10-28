@@ -62,11 +62,11 @@
   (:export
    #:with-tracer
 
-   #:recording-transform      #:recording-transform*
-   #:recording-transform/list #:recording-transform/list*
+   #:with-transform
 
-   #:ensured-transform        #:ensured-transform*
-   #:ensured-transform/list   #:ensured-transform/list*)
+   #:recording-transform #:recording-transform*
+
+   #:ensured-transform   #:ensured-transform*)
 
   (:documentation
    "TODO"))
