@@ -6,12 +6,18 @@
 
 (cl:in-package #:model.transform.trace)
 
-(defun call-recording-transform (thunk tracer transform &rest sources)
+(defgeneric call-recording-transform (thunk tracer transform &rest sources))
+
+(defmethod call-recording-transform ((thunk function) (tracer t) (transform t)
+                                     &rest sources)
   (let ((targets (multiple-value-list (funcall thunk))))
     (add-trace tracer (make-trace sources targets transform))
     (values-list targets)))
 
-(defun ensure-transformed (thunk tracer transform &rest sources)
+(defgeneric ensure-transformed (thunk tracer transform &rest sources))
+
+(defmethod ensure-transformed ((thunk function) (tracer t) (transform t)
+                               &rest sources)
   (assert (not (null sources)))
   (if-let ((cached-targets
             (if (length= 1 sources)

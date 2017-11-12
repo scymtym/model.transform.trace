@@ -187,3 +187,5 @@
   (define-abbreviation sources-for-target (target))
   (define-abbreviation map-roots-for-target (function target))
   (define-abbreviation roots-for-target (target)))
+
+;;; Recording transforms
