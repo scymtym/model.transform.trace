@@ -6,12 +6,14 @@
 
 (cl:in-package #:model.transform.trace)
 
-;;;
+;;; Context management
 
 (defmacro with-tracer ((tracer) &body body)
+  "Execute BODY with the current tracer bound to TRACER."
   `(let ((*tracer* ,tracer)) ,@body))
 
 (defmacro with-transform ((transform) &body body)
+  "Execute BODY with the current transform bound to TRANSFORM."
   `(let ((*transform* ,transform)) ,@body))
 
 ;;; {recording,ensured}-transform[*]
@@ -21,11 +23,12 @@
                   last-source-is-list?)
   (when (and last-source-is-list? (null sources-forms))
     (error "~@<At least one source form is required.~@:>"))
-  `(,function (lambda () ,@body) ,tracer-form ,transform-form
-              ,@(if last-source-is-list?
-                    sources-forms
-                    `(,@(butlast sources-forms)
-                        ,(lastcar sources-forms)))))
+  (if last-source-is-list?
+      `(apply #',function (lambda () ,@body) ,tracer-form ,transform-form
+              ,@(butlast sources-forms)
+              ,(lastcar sources-forms))
+      `(,function (lambda () ,@body) ,tracer-form ,transform-form
+                  ,@sources-forms)))
 
 (macrolet
     ((define-macros (name function)
@@ -34,6 +37,8 @@
                                               (tracer    '*tracer*))
                                    &rest sources)
                                   &body body)
+                   ,(format nil "Add a trace for TRANSFORM, SOURCES ~
+                                 and the result of BODY to TRACER.")
                    (make-call ',function tracer transform sources body
                               ,last-source-is-list?))))
          (let ((name* (symbolicate name '*)))
