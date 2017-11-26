@@ -64,9 +64,9 @@
 
    #:with-transform
 
-   #:call-recording-transform #:recording-transform
+   #:call-recording-transform #:recording-transform #:recording-transform*
 
-   #:ensure-transformed #:ensured-transform)
+   #:ensure-transformed       #:ensured-transform   #:ensured-transform*)
 
   (:documentation
    "TODO"))
