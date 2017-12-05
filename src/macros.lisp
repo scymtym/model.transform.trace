@@ -18,17 +18,20 @@
 
 ;;; {recording,ensured}-transform[*]
 
-(defun make-call (function
-                  tracer-form transform-form sources-forms body
+(defun make-call (function argument-forms sources-forms body
                   last-source-is-list?)
   (when (and last-source-is-list? (null sources-forms))
     (error "~@<At least one source form is required.~@:>"))
   (if last-source-is-list?
-      `(apply #',function (lambda () ,@body) ,tracer-form ,transform-form
-              ,@(butlast sources-forms)
-              ,(lastcar sources-forms))
-      `(,function (lambda () ,@body) ,tracer-form ,transform-form
-                  ,@sources-forms)))
+      `(apply #',function (lambda () ,@body) ,@argument-forms
+              ,@(butlast sources-forms) ,(lastcar sources-forms))
+      `(,function (lambda () ,@body) ,@argument-forms ,@sources-forms)))
+
+(defmacro with-current-sources ((&rest sources) &body body)
+  (make-call 'call-with-current-sources '() sources body nil))
+
+(defmacro with-current-sources* ((&rest sources) &body body)
+  (make-call 'call-with-current-sources '() sources body t))
 
 (macrolet
     ((define-macros (name function)
