@@ -36,15 +36,17 @@
     (assert (length= 1 targets))
     (first targets)))
 
-(defmethod trace-for-target ((tracer tracer) (target t))
+(defmethod traces-for-target ((tracer tracer) (target t))
   (gethash target (%traces-by-target tracer)))
 
 (defmethod direct-sources-for-target ((tracer tracer) (target t))
-  (when-let ((trace (trace-for-target tracer target)))
-    (sources trace)))
+  (mappend #'sources (traces-for-target tracer target)))
 
 (defmethod direct-source-for-target ((tracer tracer) (target t))
-  (when-let ((sources (direct-sources-for-target tracer target)))
+  (when-let* ((traces  (trace-for-target tracer target))
+              (sources (progn
+                         (assert (length= 1 traces))
+                         (sources (first traces)))))
     (assert (length= 1 sources))
     (first sources)))
 
@@ -63,8 +65,9 @@
 
   (let ((by-target (%traces-by-target tracer)))
     (map nil (lambda (target)
-               (unless (find target (sources trace) :test #'eq)
-                 (when-let ((existing-trace (gethash target by-target '())))
+               (unless (or (typep target '(or symbol number))
+                           (find target (sources trace) :test #'eq))
+                 #+no (when-let ((existing-trace (gethash target by-target '())))
                    (error 'duplicate-trace-error
                           :tracer         tracer
                           :target         target
@@ -81,5 +84,6 @@
                (push trace (gethash source by-source '())))
          (sources trace))
     (map nil (lambda (target)
-               (setf (gethash target by-target) trace))
+               (unless (typep target '(or symbol number)) ; TODO just push here as well?
+                 (push trace (gethash target by-target '()))))
          (targets trace))))
