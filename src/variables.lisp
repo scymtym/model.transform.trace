@@ -11,3 +11,5 @@
 (defvar *tracer*)
 
 (defvar *transform*)
+
+(defvar *sources*)

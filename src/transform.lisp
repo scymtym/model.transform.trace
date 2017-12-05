@@ -6,7 +6,30 @@
 
 (cl:in-package #:model.transform.trace)
 
+(defgeneric call-with-current-sources (thunk &rest sources)
+  (:documentation
+   "Call THUNK with
+
+    Note: This is intended for detailed error locations within a transform. E.g.
+
+    (let ((input ...))
+      (with-transform (:my-transform)
+        (recording-transform (() input)
+          ...
+          (let ((part (part-of input)))
+            (with-current-sources (part)
+              (work-on part)))
+          ...))) "))
+
+(defmethod call-with-current-sources ((thunk function) &rest sources)
+  (let ((*sources* sources))
+    (funcall thunk)))
+
 (defgeneric call-recording-transform (thunk tracer transform &rest sources))
+
+(defmethod call-recording-transform :around ((thunk function) (tracer t) (transform t)
+                                             &rest sources)
+  (apply #'call-with-current-sources (lambda () (call-next-method)) sources))
 
 (defmethod call-recording-transform ((thunk function) (tracer t) (transform t)
                                      &rest sources)
@@ -15,6 +38,10 @@
     (values-list targets)))
 
 (defgeneric ensure-transformed (thunk tracer transform &rest sources))
+
+(defmethod ensure-transformed :around ((thunk function) (tracer t) (transform t)
+                                       &rest sources)
+  (apply #'call-with-current-sources (lambda () (call-next-method)) sources))
 
 (defmethod ensure-transformed ((thunk function) (tracer t) (transform t)
                                &rest sources)
