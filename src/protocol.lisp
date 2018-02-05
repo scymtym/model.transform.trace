@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol functions provided by the model.transform.trace system.
 ;;;;
-;;;; Copyright (C) 2017 Jan Moringen
+;;;; Copyright (C) 2017, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -63,98 +63,115 @@
   (:documentation
    "Add TRACE to TRACER."))
 
-;;; Transitive sources protocol
+;;; Transitive sources and targets protocol
 
-(defgeneric walk-sources-for-target (function tracer target)
-  (:documentation
-   "Call FUNCTION for objects from which TARGET is derived in TRACER.
+(macrolet
+    ((define-transitivity-protocol (query-object-name opposite-object-name terminal-object-name)
+       (let* ((traces-for-name      (symbolicate '#:traces-for- query-object-name))
+              (opposite-reader-name (symbolicate opposite-object-name '#:s))
+              (name                 (symbolicate opposite-object-name
+                                                 '#:s-for- query-object-name))
+              (walk-name            (symbolicate '#:walk- name))
+              (walk-unique-name     (symbolicate '#:walk-unique- name))
+              (terminal-name        (symbolicate terminal-object-name
+                                                 '#:s-for- query-object-name))
+              (map-terminal-name    (symbolicate '#:map- terminal-name)))
+         `(progn
+            (defgeneric ,walk-name (tracer function ,query-object-name)
+              (:documentation
+               "Call FUNCTION for objects from which TARGET is derived in TRACER.
 
-    The lambda list of FUNCTION has to be compatible with
+                The lambda list of FUNCTION has to be compatible with
 
-      (recurse source target) ; TODO transform?
+                  (recurse source target) ; TODO transform?
 
-    where
+                where
 
-      TARGET and SOURCE are target and source objects in a trace in
-      TRACER
+                  TARGET and SOURCE are target and source objects in a trace in
+                  TRACER
 
-      and RECURSE is a function that, when called, continues the
-      traversal at direct sources of SOURCE.
+                  and RECURSE is a function that, when called, continues the
+                  traversal at direct sources of SOURCE.
 
-    For sources reachable via multiple paths from TARGET, FUNCTION is
-    called once for each such path."))
+                For sources reachable via multiple paths from TARGET, FUNCTION is
+                called once for each such path."))
 
-(defgeneric sources-for-target (tracer target)
-  (:documentation
-   "TODO"))
+            (defgeneric ,name (tracer ,query-object-name)
+              (:documentation
+               "TODO"))
 
-;;; Default behavior
+            ;;; Default behavior
 
-(defmethod walk-sources-for-target ((tracer t) (function t) (target t))
-  (walk-sources-for-target tracer (ensure-function function) target))
+            (defmethod ,walk-name ((tracer t) (function t) (,query-object-name t))
+              (,walk-name tracer (ensure-function function) ,query-object-name))
 
-(defmethod walk-sources-for-target ((tracer t) (function function) (target t))
-  (labels ((rec (function target)
-             (mapc (lambda (trace)
-                     (let ((transform (transform trace)))
-                       (map 'list (lambda (source)
-                                    (labels ((recurse (&key (function function))
-                                               (rec function source)))
-                                      (funcall function #'recurse transform source target)))
-                            (sources trace))))
-                   (traces-for-target tracer target))))
-    (rec function target)))
+            (defmethod ,walk-name ((tracer t) (function function) (,query-object-name t))
+              (labels ((rec (function ,query-object-name)
+                         (mapc (lambda (trace)
+                                 (let ((transform (transform trace)))
+                                   (map 'list (lambda (,opposite-object-name)
+                                                (labels ((recurse (&key (function function))
+                                                           (rec function ,opposite-object-name)))
+                                                  (funcall function #'recurse transform source target)))
+                                        (,opposite-reader-name trace))))
+                               (,traces-for-name tracer ,query-object-name))))
+                (rec function ,query-object-name)))
 
-(defmethod walk-unique-sources-for-target ((tracer t) (function t) (target t))
-  (walk-unique-sources-for-target tracer (ensure-function function) target))
+            (defmethod ,walk-unique-name
+                ((tracer t) (function t) (,query-object-name t))
+              (,walk-unique-name tracer (ensure-function function) ,query-object-name))
 
-(defmethod walk-unique-sources-for-target
-    ((tracer t) (function function) (target t))
-  (let ((seen (make-hash-table :test #'equal)))
-    (labels
-        ((visit (function recurse transform source target)
-           (let ((key (cons source target)))
-             (multiple-value-bind (result seen?) (gethash key seen)
-               (when seen?
-                 (return-from visit result))
-               (setf (gethash key seen)
-                     t
-                     (gethash key seen)
-                     (labels ((recurse (&key (function function))
-                                (funcall recurse
-                                         :function (curry #'visit function))))
-                       (funcall function #'recurse transform source target)))))))
-      (walk-sources-for-target tracer (curry #'visit function) target))))
+            (defmethod ,walk-unique-name
+                ((tracer t) (function function) (,query-object-name t))
+              (let ((seen (make-hash-table :test #'equal)))
+                (labels
+                    ((visit (function recurse transform source target)
+                       (let ((key (cons ,opposite-object-name ,query-object-name))) ; TODO do uniqe traces instead?
+                         (multiple-value-bind (result seen?) (gethash key seen)
+                           (when seen?
+                             (return-from visit result))
+                           (setf (gethash key seen)
+                                 t
+                                 (gethash key seen)
+                                 (labels ((recurse (&key (function function))
+                                            (funcall recurse
+                                                     :function (curry #'visit function))))
+                                   (funcall function #'recurse transform source target)))))))
+                  (,walk-name tracer (curry #'visit function) ,query-object-name))))
 
-(defmethod sources-for-target ((tracer t) (target t))
-  (let ((result '()))
-    (walk-unique-sources-for-target tracer
-                                    (lambda (recurse target source)
-                                      (declare (ignore target))
-                                      (unless (funcall recurse)
-                                        (push source result))
-                                      t)
-                                    target)
-    result))
+            (defmethod ,name ((tracer t) (,query-object-name t))
+              (let ((result '()))
+                (,walk-unique-name
+                 tracer
+                 (lambda (recurse transform source target)
+                   (declare (ignore transform ,query-object-name))
+                   (unless (funcall recurse)
+                     (push ,opposite-object-name result))
+                   t)
+                 ,query-object-name)
+                result))
 
-(defmethod map-roots-for-target ((tracer t) (function t) (target t))
-  (map-roots-for-target (ensure-function function) tracer target))
+            (defmethod ,map-terminal-name ((tracer t) (function t) (,query-object-name t))
+              (,map-terminal-name (ensure-function function) tracer ,query-object-name))
 
-(defmethod map-roots-for-target ((tracer t) (function function) (target t))
-  (flet ((visit (recurse transform source target)
-           (declare (ignore transform target))
-           (unless (funcall recurse)
-             (funcall function source))
-           t))
-    (walk-unique-sources-for-target tracer #'visit target)))
+            (defmethod ,map-terminal-name ((tracer t) (function function) (,query-object-name t))
+              (flet ((visit (recurse transform source target)
+                       (declare (ignore transform ,query-object-name))
+                       (unless (funcall recurse)
+                         (funcall function ,opposite-object-name))
+                       t))
+                (,walk-unique-name tracer #'visit ,query-object-name)))
 
-(defmethod roots-for-target ((tracer t) (target t))
-  (let ((result '()))
-    (map-roots-for-target tracer
-                          (lambda (root)
-                            (push root result))
-                          target)
-    result))
+            (defmethod ,terminal-name ((tracer t) (,query-object-name t))
+              (let ((result '()))
+                (,map-terminal-name tracer
+                                    (lambda (,terminal-object-name)
+                                      (push ,terminal-object-name result))
+                                    ,query-object-name)
+                result))))))
+
+  (define-transitivity-protocol target source root)
+  (define-transitivity-protocol source target leaf))
 
 ;;; Abbreviated versions
 
@@ -187,6 +204,12 @@
   (define-abbreviation walk-unique-sources-for-target (function target))
   (define-abbreviation sources-for-target (target))
   (define-abbreviation map-roots-for-target (function target))
-  (define-abbreviation roots-for-target (target)))
+  (define-abbreviation roots-for-target (target))
+
+  (define-abbreviation walk-targets-for-source (function source))
+  (define-abbreviation walk-unique-targets-for-source (function source))
+  (define-abbreviation targets-for-source (source))
+  (define-abbreviation map-leafs-for-source (function source))
+  (define-abbreviation leafs-for-source (source)))
 
 ;;; Recording transforms

@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the model.transform.trace system.
 ;;;;
-;;;; Copyright (C) 2017 Jan Moringen
+;;;; Copyright (C) 2017, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -40,14 +40,21 @@
 
    #:add-trace                 #:add-trace*)
 
-  ;;; Transitive sources protocol
+  ;;; Transitive sources and targets protocol
   (:export
    #:walk-sources-for-target        #:walk-sources-for-target*
    #:walk-unique-sources-for-target #:walk-unique-sources-for-target*
    #:sources-for-target             #:sources-for-target*
 
    #:map-roots-for-target           #:map-roots-for-target*
-   #:roots-for-target               #:roots-for-target*)
+   #:roots-for-target               #:roots-for-target*
+
+   #:walk-targets-for-source        #:walk-targets-for-source*
+   #:walk-unique-targets-for-source #:walk-unique-targets-for-source*
+   #:targets-for-source             #:targets-for-source*
+
+   #:map-leafs-for-source           #:map-leafs-for-source*
+   #:leafs-for-source               #:leafs-for-source*)
 
   ;; Tracer class
   (:export
