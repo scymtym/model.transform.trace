@@ -30,6 +30,8 @@
 
    #:traces                    #:traces*
 
+   #:traces-for-transform
+
    #:traces-for-source         #:traces-for-source*
    #:direct-targets-for-source #:direct-targets-for-source*
    #:direct-target-for-source  #:direct-target-for-source*

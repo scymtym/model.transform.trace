@@ -190,6 +190,8 @@
                        `(,name *tracer* ,@args1))))))
   (define-abbreviation traces ())
 
+  (define-abbreviation traces-for-transform (transform))
+
   (define-abbreviation traces-for-source (source))
   (define-abbreviation direct-targets-for-source (source))
   (define-abbreviation direct-target-for-source (source))
