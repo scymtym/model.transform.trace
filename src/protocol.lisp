@@ -138,14 +138,14 @@
 
             (defmethod ,walk-name ((tracer t) (function function) (,query-object-name t))
               (labels ((rec (function ,query-object-name)
-                         (mapc (lambda (trace)
-                                 (let ((transform (transform trace)))
-                                   (map 'list (lambda (,opposite-object-name)
-                                                (labels ((recurse (&key (function function))
-                                                           (rec function ,opposite-object-name)))
-                                                  (funcall function #'recurse transform source target)))
-                                        (,opposite-reader-name trace))))
-                               (,traces-for-name tracer ,query-object-name))))
+                         (mapcan (lambda (trace)
+                                   (let ((transform (transform trace)))
+                                     (map 'list (lambda (,opposite-object-name)
+                                                  (labels ((recurse (&key (function function))
+                                                             (rec function ,opposite-object-name)))
+                                                    (funcall function #'recurse transform source target)))
+                                          (,opposite-reader-name trace))))
+                                 (,traces-for-name tracer ,query-object-name))))
                 (rec function ,query-object-name)))
 
             (defmethod ,walk-unique-name
@@ -162,7 +162,12 @@
                            (when seen?
                              (return-from visit result))
                            (setf (gethash key seen)
-                                 t
+                                 ;; Changing this to nil so `leafs-for-source' does not fail for cases like
+                                 ;; A -- transform1 --> B -- transform2 --+
+                                 ;;                     ^                 |
+                                 ;;                     +-----------------+
+                                 ;; let's see what breaks
+                                 nil ; was t
                                  (gethash key seen)
                                  (labels ((recurse (&key (function function))
                                             (funcall recurse
@@ -190,9 +195,9 @@
             (defmethod ,map-terminal-name ((tracer t) (function function) (,query-object-name t))
               (flet ((visit (recurse transform source target)
                        (declare (ignore transform ,query-object-name))
-                       (unless (funcall recurse)
-                         (funcall function ,opposite-object-name))
-                       t))
+                       (unless (find t (funcall recurse))
+                         (funcall function ,opposite-object-name)
+                         t)))
                 (,walk-unique-name tracer #'visit ,query-object-name)))
 
             (defmethod ,terminal-name ((tracer t) (,query-object-name t))
