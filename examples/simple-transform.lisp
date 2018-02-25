@@ -40,4 +40,5 @@
     (print (roots-for-target* result))
 
     ;;
-    (model.transform.trace.graph:transform-graph *tracer*)))
+    (model.transform.trace.graph:transform-graph *tracer*)
+    *tracer*))

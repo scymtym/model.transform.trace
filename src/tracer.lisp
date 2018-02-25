@@ -6,7 +6,7 @@
 
 (cl:in-package #:model.transform.trace)
 
-(defclass tracer (print-items:print-items-mixin)
+(defclass tracer (print-items:print-items-mixin) ; TODO rename to standard-tracer
   ((traces              :reader   traces
                         :initform (make-array 0 :adjustable t :fill-pointer 0))
    (traces-by-transform :reader   %traces-by-transform
@@ -84,6 +84,6 @@
                (push trace (gethash source by-source '())))
          (sources trace))
     (map nil (lambda (target)
-               (unless (typep target '(or symbol number)) ; TODO just push here as well?
+               (progn ; unless (typep target '(or symbol number)) ; TODO just push here as well?
                  (push trace (gethash target by-target '()))))
          (targets trace))))

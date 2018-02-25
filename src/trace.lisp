@@ -27,8 +27,8 @@
 (defun make-trace (source-or-sources target-or-targets
                    &optional (transform *transform*))
   (make-instance 'trace
-                 :sources   (ensure-list source-or-sources)
-                 :targets   (ensure-list target-or-targets)
+                 :sources   (remove nil (ensure-list source-or-sources)) ; TODO hack
+                 :targets   (remove nil (ensure-list target-or-targets)) ; TODO hack
                  :transform transform))
 
 (defmethod source ((trace trace))
