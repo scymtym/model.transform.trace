@@ -42,7 +42,7 @@
 
    #:add-trace                 #:add-trace*)
 
-  ;;; Transitive sources and targets protocol
+  ;; Transitive sources and targets protocol
   (:export
    #:walk-sources-for-target        #:walk-sources-for-target*
    #:walk-unique-sources-for-target #:walk-unique-sources-for-target*
