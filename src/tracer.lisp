@@ -1,6 +1,6 @@
 ;;;; tracer.lisp --- tracer class provided by the model.transform.trace system.
 ;;;;
-;;;; Copyright (C) 2017 Jan Moringen
+;;;; Copyright (C) 2017, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -17,7 +17,7 @@
                         :initform (make-hash-table :test #'eq))))
 
 (defmethod print-items:print-items append ((object tracer))
-  `((:trace-count ,(length (traces object)) "(~:D)")))
+  `((:trace-count ,(length (traces object)) "~:D trace~:P")))
 
 (defmethod traces-for-transform ((tracer tracer) (transform t))
   (gethash transform (%traces-by-transform tracer)))
@@ -63,7 +63,7 @@
                              :existing-trace existing-trace)))
               (targets trace)))
 
-  (let ((by-target (%traces-by-target tracer)))
+  #+no (let ((by-target (%traces-by-target tracer)))
     (map nil (lambda (target)
                (unless (or (typep target '(or symbol number))
                            (find target (sources trace) :test #'eq))
