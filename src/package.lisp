@@ -42,6 +42,14 @@
 
    #:add-trace                 #:add-trace*)
 
+  ;;
+  (:export
+   #:map-sources-for-transform #:map-sources-for-transform*
+   #:sources-for-transform     #:sources-for-transform*
+
+   #:map-targets-for-transform #:map-targets-for-transform*
+   #:targets-for-transform     #:targets-for-transform*)
+
   ;; Transitive sources and targets protocol
   (:export
    #:walk-sources-for-target        #:walk-sources-for-target*

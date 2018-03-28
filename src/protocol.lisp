@@ -63,6 +63,37 @@
   (:documentation
    "Add TRACE to TRACER."))
 
+;;;
+
+(macrolet
+    ((define-transform-methods (query-object-name)
+       (let* ((name            (symbolicate query-object-name
+                                            '#:s-for-transform))
+              (map-name        (symbolicate '#:map- name))
+              (direct-accessor (symbolicate query-object-name '#:s)))
+         `(progn
+            (defgeneric ,map-name (tracer function transform))
+
+            (defgeneric ,name (tracer transform))
+
+            (defmethod ,map-name ((tracer t) (function t) (transform t))
+              (,map-name tracer (ensure-function function) transform))
+
+            (defmethod ,map-name ((tracer t) (function function) (transform t))
+              (mapcan (lambda (trace)
+                        (map 'list function (,direct-accessor trace)))
+                      (traces-for-transform tracer transform)))
+
+            (defmethod ,name ((tracer t) (transform t))
+              (let ((result '()))
+                (,map-name tracer
+                           (lambda (,query-object-name)
+                             (push ,query-object-name result))
+                           transform)
+                result))))))
+  (define-transform-methods source)
+  (define-transform-methods target))
+
 ;;; Transitive sources and targets protocol
 
 (macrolet
@@ -201,6 +232,11 @@
   (define-abbreviation direct-source-for-target (target))
 
   (define-abbreviation add-trace (trace))
+
+  (define-abbreviation map-sources-for-transform (function transform))
+  (define-abbreviation sources-for-transform (transform))
+  (define-abbreviation map-targets-for-transform (function transform))
+  (define-abbreviation targets-for-transform (transform))
 
   (define-abbreviation walk-sources-for-target (function target))
   (define-abbreviation walk-unique-sources-for-target (function target))
