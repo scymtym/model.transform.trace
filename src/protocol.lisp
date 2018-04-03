@@ -114,7 +114,7 @@
 
                 The lambda list of FUNCTION has to be compatible with
 
-                  (recurse source target) ; TODO transform?
+                  (recurse transform source target)
 
                 where
 
