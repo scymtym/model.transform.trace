@@ -1,6 +1,6 @@
 ;;;; trace.lisp --- trace class provided by the model.transform.trace system.
 ;;;;
-;;;; Copyright (C) 2017 Jan Moringen
+;;;; Copyright (C) 2017, 2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -24,7 +24,8 @@
     (:transform ,(transform object) "~@[~A~]"                 ((:after :sources)))
     (:targets   ,(targets object)   "-> ~:[∅~;~:*~{~A~^ ~}~]" ((:after :transform)))))
 
-(defun make-trace (source-or-sources target-or-targets &optional transform)
+(defun make-trace (source-or-sources target-or-targets
+                   &optional (transform *transform*))
   (make-instance 'trace
                  :sources   (ensure-list source-or-sources)
                  :targets   (ensure-list target-or-targets)
