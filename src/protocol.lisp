@@ -45,7 +45,7 @@
     Signal an error if more than one target objects have been
     generated from SOURCE."))
 
-(defgeneric trace-for-target (tracer target)
+(defgeneric traces-for-target (tracer target)
   (:documentation
    "Return the trace in TRACER in which TARGET is the target object.
 
@@ -227,7 +227,7 @@
   (define-abbreviation direct-targets-for-source (source))
   (define-abbreviation direct-target-for-source (source))
 
-  (define-abbreviation trace-for-target (target))
+  (define-abbreviation traces-for-target (target))
   (define-abbreviation direct-sources-for-target (target))
   (define-abbreviation direct-source-for-target (target))
 

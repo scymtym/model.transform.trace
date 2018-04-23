@@ -36,7 +36,7 @@
    #:direct-targets-for-source #:direct-targets-for-source*
    #:direct-target-for-source  #:direct-target-for-source*
 
-   #:trace-for-target          #:trace-for-target*
+   #:traces-for-target         #:traces-for-target*
    #:direct-sources-for-target #:direct-sources-for-target*
    #:direct-source-for-target  #:direct-source-for-target*
 
