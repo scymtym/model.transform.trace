@@ -176,9 +176,11 @@
                  tracer
                  (lambda (recurse transform source target)
                    (declare (ignore transform ,query-object-name))
-                   (unless (funcall recurse)
+                   (push ,opposite-object-name result)
+                   (funcall recurse)
+                   #+previous (unless (funcall recurse)
                      (push ,opposite-object-name result))
-                   t)
+                   #+previous t)
                  ,query-object-name)
                 result))
 
