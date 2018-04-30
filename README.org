@@ -5,25 +5,27 @@
 #+KEYWORDS:    common lisp,
 #+LANGUAGE:    en
 
-* TODO Introduction
+* STARTED Introduction
 
   The ~model.transform.trace~ system
 
 * TODO Tutorial
 
-  #+BEGIN_SRC lisp :exports both
-    (let ((tracer (model.transform.trace:make-tracer)))
-      (list
-       (model.transform.trace:with-tracer (tracer)
-         (model.transform.trace:with-transform ('my-transform)
-           (model.transform.trace:recording-transform (() 1 2)
-             (+ 1 2))))
-       tracer))
+** STARTED Tracer, Traces and Transforms
 
-  #+END_SRC
+   #+BEGIN_SRC lisp :exports both
+     (let ((tracer (model.transform.trace:make-tracer)))
+       (list
+        (model.transform.trace:with-tracer (tracer)
+          (model.transform.trace:with-transform ('my-transform)
+            (model.transform.trace:recording-transform (() 1 2)
+              (+ 1 2))))
+        tracer))
 
-  #+RESULTS:
-  : (3 #<TRACER (1) {1009F8CBD3}>)
+   #+END_SRC
+
+   #+RESULTS:
+   : (3 #<TRACER (1) {1009F8CBD3}>)
 
 * STARTED Reference
 
