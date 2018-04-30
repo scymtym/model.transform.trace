@@ -7,7 +7,12 @@
 (cl:defpackage #:model.transform.trace.test
   (:use
    #:cl
+   #:alexandria
+
    #:fiveam)
+
+  (:use
+   #:model.transform.trace)
 
   (:export
    #:run-tests)
