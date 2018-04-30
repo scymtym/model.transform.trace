@@ -43,7 +43,7 @@
   (mappend #'sources (traces-for-target tracer target)))
 
 (defmethod direct-source-for-target ((tracer tracer) (target t))
-  (when-let* ((traces  (trace-for-target tracer target))
+  (when-let* ((traces  (traces-for-target tracer target))
               (sources (progn
                          (assert (length= 1 traces))
                          (sources (first traces)))))
