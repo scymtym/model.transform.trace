@@ -68,6 +68,10 @@
     Signal an error if more than one source objects have been
     recorded for TARGET."))
 
+(defgeneric clear! (tracer)
+  (:documentation
+   "Remove all traces from TRACER and return it."))
+
 (defgeneric add-trace (tracer trace)
   (:documentation
    "Add TRACE to TRACER."))

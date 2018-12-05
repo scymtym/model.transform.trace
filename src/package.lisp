@@ -40,6 +40,7 @@
    #:direct-sources-for-target #:direct-sources-for-target*
    #:direct-source-for-target  #:direct-source-for-target*
 
+   #:clear!
    #:add-trace                 #:add-trace*)
 
   ;; Sources and targets for transform protocol

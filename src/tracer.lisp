@@ -52,6 +52,12 @@
     (assert (length= 1 sources))
     (first sources)))
 
+(defmethod clear! ((tracer tracer))
+  (setf (fill-pointer (traces tracer)) 0)
+  (clrhash (%traces-by-transform tracer))
+  (clrhash (%traces-by-source tracer))
+  (clrhash (%traces-by-target tracer)))
+
 (defmethod add-trace :before ((tracer tracer) (trace t))
   ;; This can legitimately happen if e.g. transform T1 produces an
   ;; object O as its output and a second transform T2 is the identity
