@@ -29,9 +29,14 @@
       `(,function (lambda () ,@body) ,@argument-forms ,@sources-forms)))
 
 (defmacro with-current-sources ((&rest sources) &body body)
+  "Evaluate BODY with the current sources bound to SOURCES.
+
+   The main purpose binding of the current sources is error
+   reporting."
   (make-call 'call-with-current-sources '() sources body nil))
 
 (defmacro with-current-sources* ((&rest sources) &body body)
+  "Like `with-current-sources' but the last element of SOURCES is a list."
   (make-call 'call-with-current-sources '() sources body t))
 
 (macrolet
@@ -42,7 +47,11 @@
                                    &rest sources)
                                   &body body)
                    ,(format nil "Add a trace for TRANSFORM, SOURCES ~
-                                 and the result of BODY to TRACER.")
+                                 and the result of BODY to TRACER.~@
+                                 ~@
+                                 Also bind the current sources to ~
+                                 SOURCES during the evaluation of ~
+                                 BODY.")
                    (make-call ',function (list tracer transform) sources body
                               ,last-source-is-list?))))
          (let ((name* (symbolicate name '*)))
