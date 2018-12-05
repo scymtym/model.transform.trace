@@ -89,4 +89,4 @@
    #:ensure-transformed        #:ensured-transform    #:ensured-transform*)
 
   (:documentation
-   "TODO"))
+   "Facilities for recording and querying transformation traces."))
