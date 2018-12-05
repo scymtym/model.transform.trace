@@ -7,6 +7,8 @@
 (cl:in-package #:model.transform.trace)
 
 ;;; Trace protocol
+;;;
+;;; Access to information directly available in the trace object.
 
 (defgeneric sources (trace)
   (:documentation
@@ -21,6 +23,8 @@
    "Return transform stored in TRACE."))
 
 ;;; Tracer protocol
+;;;
+;;; Access to information directly available in the tracer object.
 
 (defun make-tracer ()
   "Return an object suitable for use with the tracer protocol."
@@ -32,7 +36,9 @@
 
 (defgeneric traces-for-source (tracer source)
   (:documentation
-   "Return all traces in TRACER in which SOURCE is a source object."))
+   "Return sequence of traces in TRACER in which SOURCE is a source object.
+
+    Return an empty sequence if no such trace exists in TRACER."))
 
 (defgeneric direct-targets-for-source (tracer source)
   (:documentation
@@ -43,27 +49,30 @@
    "Return the target generated from SOURCE in TRACER.
 
     Signal an error if more than one target objects have been
-    generated from SOURCE."))
+    recorded for SOURCE."))
 
 (defgeneric traces-for-target (tracer target)
   (:documentation
-   "Return the trace in TRACER in which TARGET is the target object.
+   "Return sequence of traces in TRACER in which TARGET is a target object.
 
-    Return nil if such a trace does not exist in TRACER."))
+    Return an empty sequence if no such trace exists in TRACER."))
 
 (defgeneric direct-sources-for-target (tracer target)
   (:documentation
-   "TODO"))
+   "Return sources of traces in TRACER in which TARGET is the target object."))
 
 (defgeneric direct-source-for-target (tracer target)
   (:documentation
-   "TODO"))
+   "Return the source in TRACER form which TARGET has been generated.
+
+    Signal an error if more than one source objects have been
+    recorded for TARGET."))
 
 (defgeneric add-trace (tracer trace)
   (:documentation
    "Add TRACE to TRACER."))
 
-;;;
+;;; Sources and targets for transform
 
 (macrolet
     ((define-transform-methods (query-object-name)
@@ -80,21 +89,22 @@
               (,map-name tracer (ensure-function function) transform))
 
             (defmethod ,map-name ((tracer t) (function function) (transform t))
-              (mapcan (lambda (trace)
-                        (map 'list function (,direct-accessor trace)))
-                      (traces-for-transform tracer transform)))
+              (map nil (lambda (trace)
+                         (map nil function (,direct-accessor trace)))
+                   (traces-for-transform tracer transform)))
 
             (defmethod ,name ((tracer t) (transform t))
               (let ((result '()))
-                (,map-name tracer
-                           (lambda (,query-object-name)
-                             (push ,query-object-name result))
+                (,map-name tracer (lambda (,query-object-name)
+                                    (push ,query-object-name result))
                            transform)
                 result))))))
   (define-transform-methods source)
   (define-transform-methods target))
 
 ;;; Transitive sources and targets protocol
+;;;
+;;; Walking chains of traces to reach transitive sources and targets.
 
 (macrolet
     ((define-transitivity-protocol (query-object-name opposite-object-name terminal-object-name)
@@ -129,7 +139,11 @@
 
             (defgeneric ,name (tracer ,query-object-name)
               (:documentation
-               "TODO"))
+               "Return a sequence of sources from which TARGET is derived in TRACER.
+
+                For sources reachable via multiple paths from TARGET,
+                only a single instance is included in the returned
+                sequence."))
 
             ;;; Default behavior
 

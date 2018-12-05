@@ -42,7 +42,7 @@
 
    #:add-trace                 #:add-trace*)
 
-  ;;
+  ;; Sources and targets for transform protocol
   (:export
    #:map-sources-for-transform #:map-sources-for-transform*
    #:sources-for-transform     #:sources-for-transform*

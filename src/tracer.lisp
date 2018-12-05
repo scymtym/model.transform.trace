@@ -19,6 +19,8 @@
 (defmethod print-items:print-items append ((object tracer))
   `((:trace-count ,(length (traces object)) "~:D trace~:P")))
 
+;;; Tracer protocol methods
+
 (defmethod traces-for-transform ((tracer tracer) (transform t))
   (gethash transform (%traces-by-transform tracer)))
 
