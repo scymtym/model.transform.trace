@@ -1,15 +1,48 @@
 #+TITLE:       model.transform.trace README
 #+AUTHOR:      Jan Moringen
 #+EMAIL:       jmoringe@techfak.uni-bielefeld.de
-#+DESCRIPTION:
-#+KEYWORDS:    common lisp,
+#+KEYWORDS:    common lisp, model, transformation
 #+LANGUAGE:    en
+
+#+SEQ_TODO: TODO STARTED | DONE
+#+OPTIONS: num:nil
 
 * STARTED Introduction
 
-  The ~model.transform.trace~ system
+  The ~model.transform.trace~ library provides facilities for
+  recording and querying traces of model transformations such parsing
+  textual input into an AST or transformations of intermediate
+  representations in a compiler.
 
-* TODO Tutorial
+* STARTED Glossary
+
+  Here are some frequently used (in this text as well as the library
+  itself) terms:
+
+  + trace :: An object recording the fact that a /transformation/
+             produced one or more /target/ objects from one or more
+             /source/ objects.
+
+             Technically, a trace is a triple of one /transformation/,
+             a set of /source/ objects and a set of /target/ objects.
+
+             Example: Parsing, as a transformation, may produce an AST
+             node from a range of input text.
+
+  + source :: An object from which a /transformation/ produced one or
+              more /target/ objects.
+
+  + target ::
+
+  + transformation ::
+
+                      Technically, a transformation is a
+                      client-supplied object representing a
+                      transformation.
+
+  + tracer :: A collection of traces.
+
+* STARTED Tutorial
 
 ** STARTED Tracer, Traces and Transforms
 
@@ -29,7 +62,7 @@
 
 * STARTED Reference
 
-  #+begin_src lisp :results none :exports none :session "doc"
+  #+BEGIN_SRC lisp :results none :exports none :session "doc"
     #.(progn
         #1=(ql:quickload '(:model.transform.trace :alexandria :split-sequence))
         '#1#)
@@ -40,64 +73,77 @@
              (trimmed     (mapcar (alexandria:curry #'string-left-trim '(#\Space)) lines)))
         (format nil "~(~A~) ~<~{~A~^ ~}~:@>~2%~{~A~^~%~}"
                 symbol (list lambda-list) trimmed)))
-  #+end_src
-
-  #+BEGIN_SRC lisp :results value :exports results :session "doc"
-    (doc 'model.transform.trace:with-tracer 'function)
   #+END_SRC
 
-  #+RESULTS:
-  : with-tracer (TRACER) &BODY BODY
-  :
-  : Execute BODY with the current tracer bound to TRACER.
+** STARTED The Tracer Protocol
 
-  #+BEGIN_SRC lisp :results value :exports results :session "doc"
-    (doc 'model.transform.trace:with-transform 'function)
-  #+END_SRC
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 'model.transform.trace:map-sources-for-transform 'function)
+   #+END_SRC
 
-  #+RESULTS:
-  : with-transform (TRANSFORM) &BODY BODY
-  :
-  : Execute BODY with the current transform bound to TRANSFORM.
+   #+RESULTS:
+   : map-sources-for-transform TRACER FUNCTION TRANSFORM
+   :
+   : Call FUNCTION for each source object recorded for TRANSFORM in TRACER.
+   :
+   : The lambda list of FUNCTION has to be compatible with
+   :
+   : (source)
+   :
+   : where SOURCE is the source object.
 
-  #+BEGIN_SRC lisp :results value :exports results :session "doc"
-    (doc 'model.transform.trace:recording-transform 'function)
-  #+END_SRC
+** STARTED Trace Recording Macros
 
-  #+RESULTS:
-  : recording-transform ((&OPTIONAL (TRANSFORM) (TRACER)) &REST SOURCES) &BODY BODY
-  :
-  : Add a trace for TRANSFORM, SOURCES and the result of BODY to TRACER.
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 'model.transform.trace:with-tracer 'function)
+   #+END_SRC
 
-  #+BEGIN_SRC lisp :results value :exports results :session "doc"
-  (doc 'model.transform.trace:recording-transform* 'function)
-  #+END_SRC
+   #+RESULTS:
+   : with-tracer (TRACER) &BODY BODY
+   :
+   : Execute BODY with the current tracer bound to TRACER.
 
-  #+RESULTS:
-  : recording-transform* ((&OPTIONAL (TRANSFORM) (TRACER)) &REST SOURCES) &BODY BODY
-  :
-  : Add a trace for TRANSFORM, SOURCES and the result of BODY to TRACER.
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 'model.transform.trace:with-transform 'function)
+   #+END_SRC
 
-  #+BEGIN_SRC lisp :results value :exports results :session "doc"
-    (doc 'model.transform.trace:ensured-transform 'function)
-  #+END_SRC
+   #+RESULTS:
+   : with-transform (TRANSFORM) &BODY BODY
+   :
+   : Execute BODY with the current transform bound to TRANSFORM.
 
-  #+RESULTS:
-  : ensured-transform ((&OPTIONAL (TRANSFORM) (TRACER)) &REST SOURCES) &BODY BODY
-  :
-  : Add a trace for TRANSFORM, SOURCES and the result of BODY to TRACER.
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 'model.transform.trace:recording-transform 'function)
+   #+END_SRC
 
-  #+BEGIN_SRC lisp :results value :exports results :session "doc"
-    (doc 'model.transform.trace:ensured-transform* 'function)
-  #+END_SRC
+   #+RESULTS:
+   : recording-transform ((&OPTIONAL (TRANSFORM) (TRACER)) &REST SOURCES) &BODY BODY
+   :
+   : Add a trace for TRANSFORM, SOURCES and the result of BODY to TRACER.
 
-  #+RESULTS:
-  : ensured-transform* ((&OPTIONAL (TRANSFORM) (TRACER)) &REST SOURCES) &BODY BODY
-  :
-  : Add a trace for TRANSFORM, SOURCES and the result of BODY to TRACER.
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 'model.transform.trace:recording-transform* 'function)
+   #+END_SRC
 
-* Settings                                                         :noexport:
+   #+RESULTS:
+   : recording-transform* ((&OPTIONAL (TRANSFORM) (TRACER)) &REST SOURCES) &BODY BODY
+   :
+   : Add a trace for TRANSFORM, SOURCES and the result of BODY to TRACER.
 
-#+OPTIONS: H:4 num:nil toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
-#+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
-#+SEQ_TODO: TODO STARTED | DONE
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 'model.transform.trace:ensured-transform 'function)
+   #+END_SRC
+
+   #+RESULTS:
+   : ensured-transform ((&OPTIONAL (TRANSFORM) (TRACER)) &REST SOURCES) &BODY BODY
+   :
+   : Add a trace for TRANSFORM, SOURCES and the result of BODY to TRACER.
+
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 'model.transform.trace:ensured-transform* 'function)
+   #+END_SRC
+
+   #+RESULTS:
+   : ensured-transform* ((&OPTIONAL (TRANSFORM) (TRACER)) &REST SOURCES) &BODY BODY
+   :
+   : Add a trace for TRANSFORM, SOURCES and the result of BODY to TRACER.
