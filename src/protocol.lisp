@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol functions provided by the model.transform.trace system.
 ;;;;
-;;;; Copyright (C) 2017, 2018 Jan Moringen
+;;;; Copyright (C) 2017, 2018, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -85,9 +85,24 @@
               (map-name        (symbolicate '#:map- name))
               (direct-accessor (symbolicate query-object-name '#:s)))
          `(progn
-            (defgeneric ,map-name (tracer function transform))
+            (defgeneric ,map-name (tracer function transform)
+              (:documentation
+               ,(format nil "Call FUNCTION for each ~(~A~) object ~
+                             recorded for TRANSFORM in TRACER.~@
+                             ~@
+                             The lambda list of FUNCTION has to be ~
+                             compatible with~@
+                             ~@
+                             ~2@T(~:*~(~A~))~@
+                             ~@
+                             where ~:*~A is the ~(~:*~A~) object."
+                        query-object-name)))
 
-            (defgeneric ,name (tracer transform))
+            (defgeneric ,name (tracer transform)
+              (:documentation
+               ,(format nil "Return a sequence of ~(~A~) objects ~
+                             recorded for TRANSFORM in TRACER."
+                        query-object-name)))
 
             (defmethod ,map-name ((tracer t) (function t) (transform t))
               (,map-name tracer (ensure-function function) transform))
@@ -124,22 +139,27 @@
          `(progn
             (defgeneric ,walk-name (tracer function ,query-object-name)
               (:documentation
-               "Call FUNCTION for objects from which TARGET is derived in TRACER.
-
-                The lambda list of FUNCTION has to be compatible with
-
-                  (recurse transform source target)
-
-                where
-
-                  TARGET and SOURCE are target and source objects in a trace in
-                  TRACER
-
-                  and RECURSE is a function that, when called, continues the
-                  traversal at direct sources of SOURCE.
-
-                For sources reachable via multiple paths from TARGET, FUNCTION is
-                called once for each such path."))
+               ,(format nil "Call FUNCTION for objects from which~
+                             ~A is derived in TRACER.~@
+                             ~@
+                             The lambda list of FUNCTION has to be ~
+                             compatible with~@
+                             ~@
+                             ~2@T(recurse transform source ~(~:*~A~))~@
+                             ~@
+                             where~@
+                             ~@
+                             ~2@TTARGET and SOURCE are target and~
+                             source objects in a trace in TRACER.~@
+                             ~@
+                             ~2@Tand RECURSE is a function that, when ~
+                               called, continues the traversal at ~
+                               direct sources of SOURCE.~@
+                             ~@
+                             For sources reachable via multiple paths ~
+                             from TARGET, FUNCTION is called once for ~
+                             each such path."
+                        query-object-name)))
 
             (defgeneric ,name (tracer ,query-object-name)
               (:documentation
