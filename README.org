@@ -5,7 +5,7 @@
 #+LANGUAGE:    en
 
 #+SEQ_TODO: TODO STARTED | DONE
-#+OPTIONS: num:nil
+#+OPTIONS: num:nil toc:nil
 
 * STARTED Introduction
 
@@ -19,39 +19,42 @@
   Here are some frequently used (in this text as well as the library
   itself) terms:
 
-  + trace :: An object recording the fact that a /transformation/
-             produced one or more /target/ objects from one or more
-             /source/ objects.
+  + <<glossary:trace>> trace :: An object recording the fact that a
+       [[glossary:transformation][transformation]] produced one or more [[glossary:target][target]] objects from one or
+       more [[glossary:source][source]] objects.
 
-             Technically, a trace is a triple of one /transformation/,
-             a set of /source/ objects and a set of /target/ objects.
+       Technically, a trace is a triple of one [[glossary:transformation][transformation]], a set
+       of [[glossary:source][source]] objects and a set of [[glossary:target][target]] objects.
 
-             Example: Parsing, as a transformation, may produce an AST
-             node from a range of input text.
+       Example: Parsing, as a transformation, may produce an AST node
+       from a range of input text.
 
-  + source :: An object from which a /transformation/ produced one or
-              more /target/ objects.
+  + <<glossary:source>> source :: An object from which a
+       [[glossary:transformation][transformation]] produced one or more [[glossary:target][target]] objects.
 
-  + target ::
+  + <<glossary:root>> root :: A [[glossary:source][source]] object that is not a [[glossary:target][target]]
+       object in any [[glossary:trace][trace]].
 
-  + transformation ::
+  + <<glossary:target>> target :: An object produced by a
+       [[glossary:transformation][transformation]] from one or more [[glossary:source][sources]].
 
-                      Technically, a transformation is a
-                      client-supplied object representing a
-                      transformation.
+  + <<glossary:leaf>> leaf :: A [[glossary:target][target]]
 
-  + tracer :: A collection of traces.
+  + <<glossary:transformation>> transformation :: An arbitrary
+       client-supplied object representing a transformation.
+
+  + <<glossary:tracer>> tracer :: A collection of [[glossary:trace][traces]].
 
 * STARTED Tutorial
 
 ** STARTED Tracer, Transforms and Recording Traces
 
-   Before traces can be recording, the following context has to be
+   Before [[glossary:trace][traces]] can be recorded, the following context has to be
    established:
 
-   1. A current tracer
+   1. A current [[glossary:tracer][tracer]]
 
-   2. A current transformation
+   2. A current [[glossary:transformation][transformation]]
 
    #+BEGIN_SRC lisp :exports both
      (let ((tracer (model.transform.trace:make-tracer)))
@@ -61,7 +64,6 @@
             (model.transform.trace:recording-transform (() 1 2)
               (+ 1 2))))
         tracer))
-
    #+END_SRC
 
    #+RESULTS:
