@@ -149,6 +149,14 @@
                 only a single instance is included in the returned
                 sequence."))
 
+            (defgeneric ,map-terminal-name (tracer function ,query-object-name)
+              (:documentation
+               "Call FUNCTION for roots from which TARGET is derived in TRACER."))
+
+            (defgeneric ,terminal-name (tracer ,query-object-name)
+              (:documentation
+               "Return a sequence of roots from which TARGET is derived in TRACER."))
+
             ;;; Default behavior
 
             (defmethod ,walk-name ((tracer t) (function t) (,query-object-name t))
