@@ -21,6 +21,9 @@
 
 ;;; Tracer protocol methods
 
+(defmethod transforms ((tracer tracer))
+  (hash-table-keys (%traces-by-transform tracer)))
+
 (defmethod traces-for-transform ((tracer tracer) (transform t))
   (gethash transform (%traces-by-transform tracer)))
 

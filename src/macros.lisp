@@ -1,6 +1,6 @@
 ;;;; macro.lisp --- Macros provided by the model.transform.trace system.
 ;;;;
-;;;; Copyright (C) 2017, 2018 Jan Moringen
+;;;; Copyright (C) 2017, 2018, 2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,7 +15,7 @@
 (defmacro with-transform ((transform) &body body)
   "Execute BODY with the current transform bound to TRANSFORM."
   `(let ((*transform* ,transform)) ,@body))
-;; TODO is *transform* is already bound, we are executing the new transform as part of the outer transform. This fact should be reflected somehow. maybe (let ((*transform* (make-transform transform :parent *transform*))) ...)?
+;; TODO if *transform* is already bound, we are executing the new transform as part of the outer transform. This fact should be reflected somehow. maybe (let ((*transform* (make-transform transform :parent *transform*))) ...)?
 
 ;;; with-current-sources[*], {recording,ensured}-transform[*]
 

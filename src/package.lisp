@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the model.transform.trace system.
 ;;;;
-;;;; Copyright (C) 2017, 2018 Jan Moringen
+;;;; Copyright (C) 2017, 2018, 2019, 2020y Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -27,6 +27,8 @@
   ;; Tracer protocol
   (:export
    #:make-tracer
+
+   #:transforms                #:transforms*
 
    #:traces                    #:traces*
 

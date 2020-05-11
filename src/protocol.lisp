@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol functions provided by the model.transform.trace system.
 ;;;;
-;;;; Copyright (C) 2017, 2018, 2019 Jan Moringen
+;;;; Copyright (C) 2017, 2018, 2019, 2020 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -29,6 +29,10 @@
 (defun make-tracer ()
   "Return an object suitable for use with the tracer protocol."
   (make-instance 'tracer))
+
+(defgeneric transforms (tracer)
+  (:documentation
+   "Return sequence of transforms stored in TRACER."))
 
 (defgeneric traces (tracer)
   (:documentation
@@ -272,6 +276,8 @@
                   ,(if rest
                        `(apply #',name *tracer* ,@args1 ,rest)
                        `(,name *tracer* ,@args1))))))
+  (define-abbreviation transforms ())
+
   (define-abbreviation traces ())
 
   (define-abbreviation traces-for-transform (transform))
