@@ -44,7 +44,14 @@
 
 * STARTED Tutorial
 
-** STARTED Tracer, Traces and Transforms
+** STARTED Tracer, Transforms and Recording Traces
+
+   Before traces can be recording, the following context has to be
+   established:
+
+   1. A current tracer
+
+   2. A current transformation
 
    #+BEGIN_SRC lisp :exports both
      (let ((tracer (model.transform.trace:make-tracer)))
@@ -113,6 +120,27 @@
    : Execute BODY with the current transform bound to TRANSFORM.
 
    #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 'model.transform.trace:with-current-sources 'function)
+   #+END_SRC
+
+   #+RESULTS:
+   : with-current-sources (&REST SOURCES) &BODY BODY
+   :
+   : Evaluate BODY with the current sources bound to SOURCES.
+   :
+   : The main purpose binding of the current sources is error
+   : reporting.
+
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
+     (doc 'model.transform.trace:with-current-sources* 'function)
+   #+END_SRC
+
+   #+RESULTS:
+   : with-current-sources* (&REST SOURCES) &BODY BODY
+   :
+   : Like `with-current-sources' but the last element of SOURCES is a list.
+
+   #+BEGIN_SRC lisp :results value :exports results :session "doc"
      (doc 'model.transform.trace:recording-transform 'function)
    #+END_SRC
 
@@ -120,6 +148,8 @@
    : recording-transform ((&OPTIONAL (TRANSFORM) (TRACER)) &REST SOURCES) &BODY BODY
    :
    : Add a trace for TRANSFORM, SOURCES and the result of BODY to TRACER.
+   :
+   : Also bind the current sources to SOURCES during the evaluation of BODY.
 
    #+BEGIN_SRC lisp :results value :exports results :session "doc"
      (doc 'model.transform.trace:recording-transform* 'function)
@@ -129,6 +159,8 @@
    : recording-transform* ((&OPTIONAL (TRANSFORM) (TRACER)) &REST SOURCES) &BODY BODY
    :
    : Add a trace for TRANSFORM, SOURCES and the result of BODY to TRACER.
+   :
+   : Also bind the current sources to SOURCES during the evaluation of BODY.
 
    #+BEGIN_SRC lisp :results value :exports results :session "doc"
      (doc 'model.transform.trace:ensured-transform 'function)
@@ -138,6 +170,8 @@
    : ensured-transform ((&OPTIONAL (TRANSFORM) (TRACER)) &REST SOURCES) &BODY BODY
    :
    : Add a trace for TRANSFORM, SOURCES and the result of BODY to TRACER.
+   :
+   : Also bind the current sources to SOURCES during the evaluation of BODY.
 
    #+BEGIN_SRC lisp :results value :exports results :session "doc"
      (doc 'model.transform.trace:ensured-transform* 'function)
@@ -147,3 +181,5 @@
    : ensured-transform* ((&OPTIONAL (TRANSFORM) (TRACER)) &REST SOURCES) &BODY BODY
    :
    : Add a trace for TRANSFORM, SOURCES and the result of BODY to TRACER.
+   :
+   : Also bind the current sources to SOURCES during the evaluation of BODY.
